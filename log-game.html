@@ -8,138 +8,139 @@
 </head>
 <body>
 <div id="loader-overlay" class="loader-overlay" style="display: none;">
-        <div class="loader"></div>
-    </div>
-    <div class="container">
- <img src="images/banner 2.png" alt="Chess Illustration" class="banner-image">
-               <h1>Log Chess Game</h1>
-        <form id="game-form">
-            <div class="form-group full-width">
- <label>Game Type</label>
-        <div class="radio-group">
-            <input type="radio" id="online" name="GameType" value="Online" checked>
-            <label for="online">Online</label>
-            <input type="radio" id="otb" name="GameType" value="OTB">
-            <label for="otb">OTB</label>
+    <div class="loader"></div>
+</div>
+<div class="container">
+    <img src="images/banner 2.png" alt="Chess Illustration" class="banner-image">
+    <h1>Log Chess Game</h1>
+    <form id="game-form">
+        <div class="form-group full-width">
+            <label>Game Type</label>
+            <div class="radio-group">
+                <input type="radio" id="online" name="GameType" value="Online" checked>
+                <label for="online">Online</label>
+                <input type="radio" id="otb" name="GameType" value="OTB">
+                <label for="otb">OTB</label>
+            </div>
         </div>
-   
-                <label for="pgn">PGN</label>
-                <textarea id="pgn" name="PGN" placeholder="Paste the PGN of your game here..." required></textarea>
+        
+        <div class="form-group full-width">
+            <label for="pgn">PGN</label>
+            <textarea id="pgn" name="PGN" placeholder="Paste the PGN of your game here..." required></textarea>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="evaluation-after-opening">Evaluation after opening</label>
+                <input type="text" id="evaluation-after-opening" name="Evaluation after opening">
             </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="evaluation-after-opening">Evaluation after opening</label>
-                    <input type="text" id="evaluation-after-opening" name="Evaluation after opening">
-                </div>
-
-                <div class="form-group">
-                    <label for="evaluation-beginning-end-game">Evaluation beginning end game</label>
-                    <input type="text" id="evaluation-beginning-end-game" name="Evaluation beginning end game">
-                </div>
-                
-                <div class="form-group">
-                    <label for="in-book-during-opening">In book during opening</label>
-                    <select id="in-book-during-opening" name="In book during opening">
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                        <option value="Improvised">Improvised</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="middle-game-pawn-structure">Middle game pawn structure</label>
-                    <select id="middle-game-pawn-structure" name="Middle game pawn structure">
-                        <option value="">-- Select a structure --</option>
-                        <option value="Undefined">Undefined</option>
-                        <option value="Symmetrical">Symmetrical</option>
-                        <option value="Isolani">Isolani</option>
-                        <option value="Hanging Pawns">Hanging Pawns</option>
-                        <option value="Caro Kann">Caro Kann</option>
-                        <option value="Slav">Slav</option>
-                        <option value="Carlsbad">Carlsbad</option>
-                        <option value="Hedgehog">Hedgehog</option>
-                        <option value="Stonewall">Stonewall</option>
-                        <option value="Najdorf type II">Najdorf type II</option>
-                        <option value="Najdorf type I">Najdorf type I</option>
-                        <option value="Panov">Panov</option>
-                        <option value="French type I">French type I</option>
-                        <option value="French type II">French type II</option>
-                        <option value="Scheveningen">Scheveningen</option>
-                        <option value="Dragon">Dragon</option>
-                        <option value="Grunfeld">Grunfeld</option>
-                        <option value="Asym benoni">Asym benoni</option>
-                        <option value="Marozcy bind">Marozcy bind</option>
-                        <option value="French type III">French type III</option>
-                        <option value="KID Type I">KID Type I</option>
-                        <option value="Sym benoni">Sym benoni</option>
-                        <option value="KID Type II">KID Type II</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="advantage-middle-game">Type of advantage to convert (Middle game)</label>
-                    <select id="advantage-middle-game" name="Advantage Middle Game">
-                        <option value="">-- Select an advantage --</option>
-                        <option value="king safety">king safety</option>
-                        <option value="development">development</option>
-                        <option value="initiative">initiative</option>
-                        <option value="pieces of capablanca">pieces of capablanca</option>
-                        <option value="material">material</option>
-                        <option value="positional">positional</option>
-                        <option value="space">space</option>
-                        <option value="pieces of Fisher">pieces of Fisher</option>
-                        <option value="bishop pair">bishop pair</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="advantage-end-game">Type of advantage to convert (End game)</label>
-                    <select id="advantage-end-game" name="Advantage End Game">
-                        <option value="">-- Select an advantage --</option>
-                        <option value="king safety">king safety</option>
-                        <option value="development">development</option>
-                        <option value="initiative">initiative</option>
-                        <option value="pieces of capablanca">pieces of capablanca</option>
-                        <option value="material">material</option>
-                        <option value="positional">positional</option>
-                        <option value="space">space</option>
-                        <option value="pieces of Fisher">pieces of Fisher</option>
-                        <option value="bishop pair">bishop pair</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="phase-of-the-game-where-lost">Phase of the game where lost</label>
-                    <select id="phase-of-the-game-where-lost" name="Phase of the game where lost">
-                        <option value="">N/A</option>
-                        <option value="Opening">Opening</option>
-                        <option value="Middlegame">Middlegame</option>
-                        <option value="Endgame">Endgame</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reason-for-win-loss">Reason for win/loss</label>
-                    <select id="reason-for-win-loss" name="Reason for win/loss">
-                        <option value="">-- Select a reason --</option>
-                        <option value="Tactical mistake">Tactical mistake</option>
-                        <option value="Strategical mistake">Strategical mistake</option>
-                        <option value="Blunder">Blunder</option>
-                        <option value="Time pressure">Time pressure</option>
-                        <option value="Positional mistake">Positional mistake</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="evaluation-beginning-end-game">Evaluation beginning end game</label>
+                <input type="text" id="evaluation-beginning-end-game" name="Evaluation beginning end game">
+            </div>
+            
+            <div class="form-group">
+                <label for="in-book-during-opening">In book during opening</label>
+                <select id="in-book-during-opening" name="In book during opening">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                    <option value="Improvised">Improvised</option>
+                </select>
             </div>
 
-            <button type="submit">Save Game</button>
-        </form>
-<div class="nav-buttons">
-            <button onclick="window.location.href='index.html'" class="button-secondary">← Back to Home</button>
-            <button onclick="window.location.href='dashboard.html'" class="button-secondary">View Dashboard →</button>
+            <div class="form-group">
+                <label for="middle-game-pawn-structure">Middle game pawn structure</label>
+                <select id="middle-game-pawn-structure" name="Middle game pawn structure">
+                    <option value="">-- Select a structure --</option>
+                    <option value="Undefined">Undefined</option>
+                    <option value="Symmetrical">Symmetrical</option>
+                    <option value="Isolani">Isolani</option>
+                    <option value="Hanging Pawns">Hanging Pawns</option>
+                    <option value="Caro Kann">Caro Kann</option>
+                    <option value="Slav">Slav</option>
+                    <option value="Carlsbad">Carlsbad</option>
+                    <option value="Hedgehog">Hedgehog</option>
+                    <option value="Stonewall">Stonewall</option>
+                    <option value="Najdorf type II">Najdorf type II</option>
+                    <option value="Najdorf type I">Najdorf type I</option>
+                    <option value="Panov">Panov</option>
+                    <option value="French type I">French type I</option>
+                    <option value="French type II">French type II</option>
+                    <option value="Scheveningen">Scheveningen</option>
+                    <option value="Dragon">Dragon</option>
+                    <option value="Grunfeld">Grunfeld</option>
+                    <option value="Asym benoni">Asym benoni</option>
+                    <option value="Marozcy bind">Marozcy bind</option>
+                    <option value="French type III">French type III</option>
+                    <option value="KID Type I">KID Type I</option>
+                    <option value="Sym benoni">Sym benoni</option>
+                    <option value="KID Type II">KID Type II</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="advantage-middle-game">Type of advantage to convert (Middle game)</label>
+                <select id="advantage-middle-game" name="Advantage Middle Game">
+                    <option value="">-- Select an advantage --</option>
+                    <option value="king safety">king safety</option>
+                    <option value="development">development</option>
+                    <option value="initiative">initiative</option>
+                    <option value="pieces of capablanca">pieces of capablanca</option>
+                    <option value="material">material</option>
+                    <option value="positional">positional</option>
+                    <option value="space">space</option>
+                    <option value="pieces of Fisher">pieces of Fisher</option>
+                    <option value="bishop pair">bishop pair</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="advantage-end-game">Type of advantage to convert (End game)</label>
+                <select id="advantage-end-game" name="Advantage End Game">
+                    <option value="">-- Select an advantage --</option>
+                    <option value="king safety">king safety</option>
+                    <option value="development">development</option>
+                    <option value="initiative">initiative</option>
+                    <option value="pieces of capablanca">pieces of capablanca</option>
+                    <option value="material">material</option>
+                    <option value="positional">positional</option>
+                    <option value="space">space</option>
+                    <option value="pieces of Fisher">pieces of Fisher</option>
+                    <option value="bishop pair">bishop pair</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="phase-of-the-game-where-lost">Phase of the game where lost</label>
+                <select id="phase-of-the-game-where-lost" name="Phase of the game where lost">
+                    <option value="">N/A</option>
+                    <option value="Opening">Opening</option>
+                    <option value="Middlegame">Middlegame</option>
+                    <option value="Endgame">Endgame</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="reason-for-win-loss">Reason for win/loss</label>
+                <select id="reason-for-win-loss" name="Reason for win/loss">
+                    <option value="">-- Select a reason --</option>
+                    <option value="Tactical mistake">Tactical mistake</option>
+                    <option value="Strategical mistake">Strategical mistake</option>
+                    <option value="Blunder">Blunder</option>
+                    <option value="Time pressure">Time pressure</option>
+                    <option value="Positional mistake">Positional mistake</option>
+                </select>
+            </div>
         </div>
+
+        <button type="submit">Save Game</button>
+    </form>
+    <div class="nav-buttons">
+        <button onclick="window.location.href='index.html'" class="button-secondary">← Back to Home</button>
+        <button onclick="window.location.href='dashboard.html'" class="button-secondary">View Dashboard →</button>
     </div>
-    <script src="script.js"></script>
+</div>
+<script src="script.js"></script>
 </body>
-
 </html>
