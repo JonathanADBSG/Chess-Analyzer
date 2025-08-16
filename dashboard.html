@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        .stat-card {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .stat-card h2 {
+            margin-top: 0;
+            font-size: 18px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .stat-card h3 {
+            font-size: 16px;
+            color: #555;
+        }
+        .stat-list {
+            list-style-type: none;
+            padding-left: 0;
+            font-size: 16px;
+        }
+        .stat-list li {
+            padding: 5px 0;
+        }
+        #opening-stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        #opening-stats-table th, #opening-stats-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #opening-stats-table th {
+            background-color: #f2f2f2;
+        }
+/* Add this new rule for the 3-column performance section */
+.performance-grid {
+    grid-column: 1 / -1; /* This makes the container span the full width */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+/* Add this new rule to control the size of all pie charts */
+.stat-card canvas {
+    max-height: 280px; /* Adjust this value to make charts bigger or smaller */
+}
+
+.reasons-grid {
+    grid-column: 1 / -1; /* This makes the container span the full width */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.side-by-side-lists {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+    </style>
+</head>
+<body>
+<div id="loader-overlay" class="loader-overlay" style="display: none;">
+        <div class="loader"></div>
+    </div>
+    <div class="container">
+<img src="images/banner 3.png" alt="Chess Illustration" class="banner-image">
+        <h1>Chess Dashboard</h1>
+
+<div class="form-group" id="type-filter-container">
+    <label>Filter by Game Type</label>
+    <div>
+        <button class="filter-btn active" data-type="All">All Games</button>
+        <button class="filter-btn" data-type="Online">Online</button>
+        <button class="filter-btn" data-type="OTB">OTB</button>
+    </div>
+</div>
+
+        <div class="form-group" id="filter-container">
+            <label>Filter by Date</label>
+            <div>
+                <button class="filter-btn active" data-days="0">All Time</button>
+                <button class="filter-btn" data-days="30">Last 30 Days</button>
+                <button class="filter-btn" data-days="180">Last 6 Months</button>
+                <button class="filter-btn" data-days="365">Last 12 Months</button>
+            </div>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <h2>Overall Performance</h2>
+                <canvas id="overall-stats-chart"></canvas>
+            </div>
+
+<div class="performance-grid">
+
+            <div class="stat-card">
+                <h2>Performance as White</h2>
+                <canvas id="white-stats-chart"></canvas>
+            </div>
+
+            <div class="stat-card">
+                <h2>Performance as Black</h2>
+                <canvas id="black-stats-chart"></canvas>
+            </div>
+ </div>
+
+<div class="reasons-grid">
+            <div class="stat-card">
+                <h2>Top 3 Reasons as White</h2>
+                <h3>Wins</h3>
+                <ul id="top-reasons-win-white" class="stat-list"></ul>
+                <h3>Losses</h3>
+                <ul id="top-reasons-loss-white" class="stat-list"></ul>
+            </div>
+
+            <div class="stat-card">
+                <h2>Top 3 Reasons as Black</h2>
+                <h3>Wins</h3>
+                <ul id="top-reasons-win-black" class="stat-list"></ul>
+                <h3>Losses</h3>
+                <ul id="top-reasons-loss-black" class="stat-list"></ul>
+            </div>
+</div>
+
+            <div class="stat-card">
+    <h2>Top 3 Advantage Types</h2>
+    <div class="side-by-side-lists">
+        <div>
+            <h3>Best to Convert</h3>
+            <ul id="best-advantages" class="stat-list"></ul>
+        </div>
+        <div>
+            <h3>Worst to Convert</h3>
+            <ul id="worst-advantages" class="stat-list"></ul>
+        </div>
+    </div>
+</div>
+
+<div class="reasons-grid">
+
+            <div class="stat-card">
+                <h2>Phase Analyzer (as White)</h2>
+                <ul class="stat-list">
+                    <li>Better after Opening: <strong id="opening-advantage-pct-white">-%</strong></li>
+                    <li>Better at Endgame Start: <strong id="endgame-advantage-pct-white">-%</strong></li>
+                </ul>
+            </div>
+
+            <div class="stat-card">
+                <h2>Phase Analyzer (as Black)</h2>
+                <ul class="stat-list">
+                    <li>Better after Opening: <strong id="opening-advantage-pct-black">-%</strong></li>
+                    <li>Better at Endgame Start: <strong id="endgame-advantage-pct-black">-%</strong></li>
+                </ul>
+            </div>
+</div>
+
+            <div class="stat-card">
+                <h2>Losses by Game Phase</h2>
+                <canvas id="loss-phase-chart"></canvas>
+            </div>
+            
+            <div class="stat-card" style="grid-column: 1 / -1;">
+                <h2>Opening Performance</h2>
+                <table id="opening-stats-table">
+                    <thead>
+                        <tr>
+                            <th>Opening</th>
+                            <th>My Color</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>Draws</th>
+                            <th>Win Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="stat-card">
+                <h2>Top 3 Best Openings as White</h2>
+                <ul id="top-openings-white-best" class="stat-list"></ul>
+            </div>
+
+            <div class="stat-card">
+                <h2>Top 3 Worst Openings as White</h2>
+                <ul id="top-openings-white-worst" class="stat-list"></ul>
+            </div>
+
+            <div class="stat-card">
+                <h2>Top 3 Best Openings as Black</h2>
+                <ul id="top-openings-black-best" class="stat-list"></ul>
+            </div>
+
+            <div class="stat-card">
+                <h2>Top 3 Worst Openings as Black</h2>
+                <ul id="top-openings-black-worst" class="stat-list"></ul>
+            </div>
+        </div>
+
+        <button onclick="window.location.href='index.html'" class="button-secondary" style="margin-top: 20px;">← Back to Home</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
