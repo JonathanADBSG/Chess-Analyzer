@@ -15,7 +15,18 @@
     <h1>Log Chess Game</h1>
     <form id="game-form">
 
-<div class="form-group full-width">
+        <fieldset class="form-group full-width">
+  <legend>Game Type</legend>
+  <div class="radio-group">
+    <input type="radio" id="online" name="GameType" value="Online" checked>
+    <label for="online">Online</label>
+
+    <input type="radio" id="otb" name="GameType" value="OTB">
+    <label for="otb">OTB</label>
+  </div>
+</fieldset>
+
+<!--<div class="form-group full-width">
             <label>Game Type</label>
             <div class="radio-group">
                 <input type="radio" id="online" name="GameType" value="Online" checked>
@@ -23,7 +34,7 @@
                 <input type="radio" id="otb" name="GameType" value="OTB">
                 <label for="otb">OTB</label>
             </div>
-        </div> 
+        </div> -->
         
         <div class="form-group full-width">
             <label for="pgn">PGN</label>
@@ -145,5 +156,6 @@
 <script src="script.js"></script>
 </body>
 </html>
+
 
 
