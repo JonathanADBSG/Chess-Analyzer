@@ -21,6 +21,7 @@ async function handleFormSubmit(e) {
     const formData = new FormData(form);
     // Convert FormData to a plain object
     const dataObject = Object.fromEntries(formData);
+    console.log("DataObject being sent:", dataObject);
 
     // Send the data to the Google Apps Script
     const response = await fetch(SCRIPT_URL, {
@@ -49,4 +50,5 @@ async function handleFormSubmit(e) {
 }
 
 // Add the event listener to the form
+
 form.addEventListener('submit', handleFormSubmit);
