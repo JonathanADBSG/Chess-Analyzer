@@ -1,6 +1,6 @@
 // --- CONFIGURATION ---
 // IMPORTANT: Paste your Google Apps Script Web App URL here
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqTlhkVuxEXuySJKa1VVgjbW6Zica3jptQHeHM1VjNhP1nxihJKTcz6GDC5H89hNUB/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw7FmlvMtpY1_nDyKUsvJVvvh79HTDWl3RcKZHDvFw2AnLnzsz8d3YXbtJEdT0JgT32/exec";
 
 // --- SCRIPT ---
 const form = document.getElementById('game-form');
@@ -52,3 +52,4 @@ async function handleFormSubmit(e) {
 // Add the event listener to the form
 
 form.addEventListener('submit', handleFormSubmit);
+
