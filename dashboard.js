@@ -24,6 +24,8 @@ const topOpeningsWhiteWorstUl = document.getElementById('top-openings-white-wors
 const topOpeningsBlackBestUl = document.getElementById('top-openings-black-best');
 const topOpeningsBlackWorstUl = document.getElementById('top-openings-black-worst');
 const openingStatsTbody = document.querySelector('#opening-stats-table tbody');
+const openingAdvChartCanvas = document.getElementById('opening-advantage-chart');
+const endgameAdvChartCanvas = document.getElementById('endgame-advantage-chart');
 
 
 // --- STATE & CHART VARIABLES ---
@@ -31,6 +33,7 @@ let allGames = [];
 let currentDateFilter = 0; // 0 for All Time
 let currentGameTypeFilter = 'All'; // 'All', 'Online', or 'OTB'
 let overallChart, whiteChart, blackChart, lossPhaseChart;
+let openingAdvChart, endgameAdvChart;
 
 /**
  * Main function to fetch all data and initialize the dashboard
@@ -68,6 +71,7 @@ function updateDashboard() {
     updatePhaseAnalyzer(filteredGames);
     updateLossPhaseReport(filteredGames);
     updateOpeningReport(filteredGames);
+    updateAdvantageOutcomeCharts(filteredGames);
 }
 
 /**
@@ -363,6 +367,61 @@ function updateAdvantageReport(games) {
 
     renderList(bestAdvantagesUl, best);
     renderList(worstAdvantagesUl, worst);
+}
+
+/**
+ * This function calculates W/L/D for games where you had an advantage after opening or at endgame start.
+ */
+function updateAdvantageOutcomeCharts(games) {
+    // --- Opening Advantage ---
+    const openingGames = games.filter(game => {
+        const evalOpening = parseFloat(game['Evaluation after opening']);
+        if (game.MyColor === 'White' && !isNaN(evalOpening)) return evalOpening > 0;
+        if (game.MyColor === 'Black' && !isNaN(evalOpening)) return evalOpening < 0;
+        return false;
+    });
+
+    const openingStats = { wins: 0, losses: 0, draws: 0 };
+    openingGames.forEach(game => {
+        if (game.Result === '1/2-1/2') openingStats.draws++;
+        else if ((game.MyColor === 'White' && game.Result === '1-0') || 
+                 (game.MyColor === 'Black' && game.Result === '0-1')) {
+            openingStats.wins++;
+        } else {
+            openingStats.losses++;
+        }
+    });
+
+    renderPieChart(openingAdvChartCanvas, 'openingAdvChart', {
+        labels: ['Wins', 'Losses', 'Draws'],
+        data: [openingStats.wins, openingStats.losses, openingStats.draws],
+        colors: ['#28a745', '#dc3545', '#6c757d']
+    }, { responsive: true, plugins: { legend: { position: 'top' } } });
+
+    // --- Endgame Advantage ---
+    const endgameGames = games.filter(game => {
+        const evalEnd = parseFloat(game['Evaluation beginning end game']);
+        if (game.MyColor === 'White' && !isNaN(evalEnd)) return evalEnd > 0;
+        if (game.MyColor === 'Black' && !isNaN(evalEnd)) return evalEnd < 0;
+        return false;
+    });
+
+    const endgameStats = { wins: 0, losses: 0, draws: 0 };
+    endgameGames.forEach(game => {
+        if (game.Result === '1/2-1/2') endgameStats.draws++;
+        else if ((game.MyColor === 'White' && game.Result === '1-0') || 
+                 (game.MyColor === 'Black' && game.Result === '0-1')) {
+            endgameStats.wins++;
+        } else {
+            endgameStats.losses++;
+        }
+    });
+
+    renderPieChart(endgameAdvChartCanvas, 'endgameAdvChart', {
+        labels: ['Wins', 'Losses', 'Draws'],
+        data: [endgameStats.wins, endgameStats.losses, endgameStats.draws],
+        colors: ['#28a745', '#dc3545', '#6c757d']
+    }, { responsive: true, plugins: { legend: { position: 'top' } } });
 }
 
 /**
