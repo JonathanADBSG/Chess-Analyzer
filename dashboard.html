@@ -75,18 +75,28 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
-		/* Put filter buttons in one row */
-.type-filter-container div,
-.filter-container div {
-    display: flex;
-    gap: 10px;           /* space between buttons */
-    flex-wrap: wrap;     /* allows wrapping on small screens */
+/* Put the buttons on one row */
+#type-filter-container > div,
+#filter-container > div {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;        /* keep them on a single line */
+  align-items: center;
 }
 
-.type-filter-container button,
-.filter-container button {
-    flex: 1 1 auto;      /* make them flexible but even sized */
-    white-space: nowrap; /* prevent text from breaking */
+/* Ensure buttons don't stretch full width */
+#type-filter-container .filter-btn,
+#filter-container .filter-btn {
+  width: auto !important;   /* override any width:100% from style.css */
+  display: inline-flex;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* Optional: if they overflow on small screens, allow horizontal scroll */
+#type-filter-container > div,
+#filter-container > div {
+  overflow-x: auto;
 }
 
 
@@ -253,5 +263,6 @@
     <script src="dashboard.js"></script>
 </body>
 </html>
+
 
 
