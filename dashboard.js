@@ -194,7 +194,7 @@ function updateLossPhaseReport(games) {
 }
 
 /**
- * MODIFIED: Calculates and displays the detailed Game Phase Analyzer statistics by color
+ * Calculates and displays the detailed Game Phase Analyzer statistics by color
  */
 function updatePhaseAnalyzer(games) {
     // Initialize counters for all 20 metrics + totals
@@ -381,22 +381,22 @@ function updateAdvantageReport(games) {
 }
 
 /**
- * This function calculates W/L/D for games where you had an advantage after opening or at endgame start.
+ * CORRECTED: This function calculates W/L/D for games where you had an advantage.
+ * It now correctly handles the new evaluation system for both colors.
  */
 function updateAdvantageOutcomeCharts(games) {
     // --- Opening Advantage ---
-    const openingGames = games.filter(game => {
+    const openingGamesWithAdvantage = games.filter(game => {
         const evalOpening = parseFloat(game['Evaluation after opening']);
-        if (isNaN(evalOpening)) return false;
-        // Advantage is now considered "Slightly Better" (0.5) or "Better" (1.0)
-        return evalOpening > 0;
+        // An advantage is a positive evaluation (0.5 for Slightly Better, 1.0 for Better).
+        // This logic is now color-agnostic because the form captures the player's perspective.
+        return !isNaN(evalOpening) && evalOpening > 0;
     });
 
     const openingStats = { wins: 0, losses: 0, draws: 0 };
-    openingGames.forEach(game => {
+    openingGamesWithAdvantage.forEach(game => {
         if (game.Result === '1/2-1/2') openingStats.draws++;
-        else if ((game.MyColor === 'White' && game.Result === '1-0') || 
-                 (game.MyColor === 'Black' && game.Result === '0-1')) {
+        else if ((game.MyColor === 'White' && game.Result === '1-0') || (game.MyColor === 'Black' && game.Result === '0-1')) {
             openingStats.wins++;
         } else {
             openingStats.losses++;
@@ -410,18 +410,16 @@ function updateAdvantageOutcomeCharts(games) {
     }, { responsive: true, plugins: { legend: { position: 'top' } } });
 
     // --- Endgame Advantage ---
-    const endgameGames = games.filter(game => {
+    const endgameGamesWithAdvantage = games.filter(game => {
         const evalEnd = parseFloat(game['Evaluation beginning end game']);
-        if (isNaN(evalEnd)) return false;
-        // Advantage is now considered "Slightly Better" (0.5) or "Better" (1.0)
-        return evalEnd > 0;
+        // The logic is the same for the endgame evaluation.
+        return !isNaN(evalEnd) && evalEnd > 0;
     });
 
     const endgameStats = { wins: 0, losses: 0, draws: 0 };
-    endgameGames.forEach(game => {
+    endgameGamesWithAdvantage.forEach(game => {
         if (game.Result === '1/2-1/2') endgameStats.draws++;
-        else if ((game.MyColor === 'White' && game.Result === '1-0') || 
-                 (game.MyColor === 'Black' && game.Result === '0-1')) {
+        else if ((game.MyColor === 'White' && game.Result === '1-0') || (game.MyColor === 'Black' && game.Result === '0-1')) {
             endgameStats.wins++;
         } else {
             endgameStats.losses++;
@@ -434,6 +432,7 @@ function updateAdvantageOutcomeCharts(games) {
         colors: ['#28a745', '#dc3545', '#6c757d']
     }, { responsive: true, plugins: { legend: { position: 'top' } } });
 }
+
 
 /**
  * Generic helper function to render a pie chart with custom data
@@ -474,5 +473,4 @@ typeFilterContainer.addEventListener('click', (e) => {
 });
 
 // --- INITIALIZATION ---
-
 initializeDashboard();
