@@ -28,6 +28,7 @@
         .stat-card h3 {
             font-size: 16px;
             color: #555;
+            margin-bottom: 5px;
         }
         .stat-list {
             list-style-type: none;
@@ -98,8 +99,6 @@
 #filter-container > div {
   overflow-x: auto;
 }
-
-
     </style>
 </head>
 <body>
@@ -184,17 +183,41 @@
 
             <div class="stat-card">
                 <h2>Phase Analyzer (as White)</h2>
+                <h3>After Opening</h3>
                 <ul class="stat-list">
-                    <li>Better after Opening: <strong id="opening-advantage-pct-white">-%</strong></li>
-                    <li>Better at Endgame Start: <strong id="endgame-advantage-pct-white">-%</strong></li>
+                    <li>Better: <strong id="opening-better-pct-white">-%</strong></li>
+                    <li>Slightly Better: <strong id="opening-slightly-better-pct-white">-%</strong></li>
+                    <li>Equal: <strong id="opening-equal-pct-white">-%</strong></li>
+                    <li>Slightly Worse: <strong id="opening-slightly-worse-pct-white">-%</strong></li>
+                    <li>Worse: <strong id="opening-worse-pct-white">-%</strong></li>
+                </ul>
+                <h3>At Endgame Start</h3>
+                <ul class="stat-list">
+                    <li>Better: <strong id="endgame-better-pct-white">-%</strong></li>
+                    <li>Slightly Better: <strong id="endgame-slightly-better-pct-white">-%</strong></li>
+                    <li>Equal: <strong id="endgame-equal-pct-white">-%</strong></li>
+                    <li>Slightly Worse: <strong id="endgame-slightly-worse-pct-white">-%</strong></li>
+                    <li>Worse: <strong id="endgame-worse-pct-white">-%</strong></li>
                 </ul>
             </div>
 
             <div class="stat-card">
                 <h2>Phase Analyzer (as Black)</h2>
+                <h3>After Opening</h3>
                 <ul class="stat-list">
-                    <li>Better after Opening: <strong id="opening-advantage-pct-black">-%</strong></li>
-                    <li>Better at Endgame Start: <strong id="endgame-advantage-pct-black">-%</strong></li>
+                    <li>Better: <strong id="opening-better-pct-black">-%</strong></li>
+                    <li>Slightly Better: <strong id="opening-slightly-better-pct-black">-%</strong></li>
+                    <li>Equal: <strong id="opening-equal-pct-black">-%</strong></li>
+                    <li>Slightly Worse: <strong id="opening-slightly-worse-pct-black">-%</strong></li>
+                    <li>Worse: <strong id="opening-worse-pct-black">-%</strong></li>
+                </ul>
+                <h3>At Endgame Start</h3>
+                <ul class="stat-list">
+                    <li>Better: <strong id="endgame-better-pct-black">-%</strong></li>
+                    <li>Slightly Better: <strong id="endgame-slightly-better-pct-black">-%</strong></li>
+                    <li>Equal: <strong id="endgame-equal-pct-black">-%</strong></li>
+                    <li>Slightly Worse: <strong id="endgame-slightly-worse-pct-black">-%</strong></li>
+                    <li>Worse: <strong id="endgame-worse-pct-black">-%</strong></li>
                 </ul>
             </div>
 </div>
@@ -265,9 +288,3 @@
     <script src="dashboard.js"></script>
 </body>
 </html>
-
-
-
-
-
-
