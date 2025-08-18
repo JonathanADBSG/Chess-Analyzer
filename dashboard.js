@@ -19,7 +19,8 @@ const topOpeningsWhiteBestUl = document.getElementById('top-openings-white-best'
 const topOpeningsWhiteWorstUl = document.getElementById('top-openings-white-worst');
 const topOpeningsBlackBestUl = document.getElementById('top-openings-black-best');
 const topOpeningsBlackWorstUl = document.getElementById('top-openings-black-worst');
-const improvisedOpeningsUl = document.getElementById('improvised-openings-list'); // New element
+const improvisedOpeningsWhiteUl = document.getElementById('improvised-openings-white-list'); // New
+const improvisedOpeningsBlackUl = document.getElementById('improvised-openings-black-list'); // New
 const openingStatsTbody = document.querySelector('#opening-stats-table tbody');
 const openingAdvChartCanvas = document.getElementById('opening-advantage-chart');
 const endgameAdvChartCanvas = document.getElementById('endgame-advantage-chart');
@@ -68,7 +69,7 @@ function updateDashboard() {
     updatePhaseAnalyzer(filteredGames);
     updateLossPhaseReport(filteredGames);
     updateOpeningReport(filteredGames);
-    updateImprovisedOpeningsReport(filteredGames); // New function call
+    updateImprovisedOpeningsReport(filteredGames);
     updateAdvantageOutcomeCharts(filteredGames);
 }
 
@@ -173,10 +174,11 @@ function updateOpeningReport(games) {
 }
 
 /**
- * NEW: Calculates and displays the top 3 openings that are most frequently improvised or out-of-book.
+ * MODIFIED: Calculates top 3 improvised openings separately for White and Black.
  */
 function updateImprovisedOpeningsReport(games) {
-    const openingStats = {};
+    const whiteOpeningStats = {};
+    const blackOpeningStats = {};
     const minGamesForRanking = 2; // Minimum number of games to be considered
 
     games.forEach(game => {
@@ -185,14 +187,23 @@ function updateImprovisedOpeningsReport(games) {
 
         if (!opening || !inBookStatus) return; // Skip if data is missing
 
-        // Apply the same custom grouping as in the main opening report
-        if (game.MyColor === 'White' && opening.startsWith("Queen's Pawn Game: Chigorin Variation")) {
-            opening = "Rapport-Jobava System";
+        let targetStats;
+
+        if (game.MyColor === 'White') {
+            // Apply custom grouping for White
+            if (opening.startsWith("Queen's Pawn Game: Chigorin Variation")) {
+                opening = "Rapport-Jobava System";
+            }
+            targetStats = whiteOpeningStats;
+        } else if (game.MyColor === 'Black') {
+            targetStats = blackOpeningStats;
+        } else {
+            return; // Skip if color isn't White or Black
         }
 
         // Initialize if first time seeing this opening
-        if (!openingStats[opening]) {
-            openingStats[opening] = {
+        if (!targetStats[opening]) {
+            targetStats[opening] = {
                 name: opening,
                 total: 0,
                 improvisedCount: 0
@@ -200,25 +211,31 @@ function updateImprovisedOpeningsReport(games) {
         }
 
         // Increment counts
-        openingStats[opening].total++;
+        targetStats[opening].total++;
         if (inBookStatus === 'No' || inBookStatus === 'Improvised') {
-            openingStats[opening].improvisedCount++;
+            targetStats[opening].improvisedCount++;
         }
     });
 
-    // Process and rank the openings
-    const rankedOpenings = Object.values(openingStats)
-        .filter(stats => stats.total >= minGamesForRanking) // Filter for openings with enough games
-        .map(stats => ({
-            ...stats,
-            improvisedPct: (stats.improvisedCount / stats.total) * 100
-        }))
-        .sort((a, b) => b.improvisedPct - a.improvisedPct) // Sort by highest percentage
-        .slice(0, 3) // Get the top 3
-        .map(stats => `${stats.name} (${stats.improvisedPct.toFixed(0)}% improvised over ${stats.total} games)`);
+    // Helper function to process and rank the openings for a given color
+    const rankAndFormat = (statsObject) => {
+        return Object.values(statsObject)
+            .filter(stats => stats.total >= minGamesForRanking)
+            .map(stats => ({
+                ...stats,
+                improvisedPct: (stats.improvisedCount / stats.total) * 100
+            }))
+            .sort((a, b) => b.improvisedPct - a.improvisedPct)
+            .slice(0, 3)
+            .map(stats => `${stats.name} (${stats.improvisedPct.toFixed(0)}% improvised over ${stats.total} games)`);
+    };
 
-    // Render the list to the UI
-    renderList(improvisedOpeningsUl, rankedOpenings);
+    // Process for each color and render to the UI
+    const rankedWhiteOpenings = rankAndFormat(whiteOpeningStats);
+    const rankedBlackOpenings = rankAndFormat(blackOpeningStats);
+
+    renderList(improvisedOpeningsWhiteUl, rankedWhiteOpenings);
+    renderList(improvisedOpeningsBlackUl, rankedBlackOpenings);
 }
 
 
