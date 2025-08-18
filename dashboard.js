@@ -14,10 +14,6 @@ const topReasonsWinBlackUl = document.getElementById('top-reasons-win-black');
 const topReasonsLossBlackUl = document.getElementById('top-reasons-loss-black');
 const bestAdvantagesUl = document.getElementById('best-advantages');
 const worstAdvantagesUl = document.getElementById('worst-advantages');
-const openingAdvPctWhite = document.getElementById('opening-advantage-pct-white');
-const endgameAdvPctWhite = document.getElementById('endgame-advantage-pct-white');
-const openingAdvPctBlack = document.getElementById('opening-advantage-pct-black');
-const endgameAdvPctBlack = document.getElementById('endgame-advantage-pct-black');
 const lossPhaseChartCanvas = document.getElementById('loss-phase-chart');
 const topOpeningsWhiteBestUl = document.getElementById('top-openings-white-best');
 const topOpeningsWhiteWorstUl = document.getElementById('top-openings-white-worst');
@@ -198,48 +194,63 @@ function updateLossPhaseReport(games) {
 }
 
 /**
- * Calculates and displays the Game Phase Analyzer statistics by color
+ * MODIFIED: Calculates and displays the detailed Game Phase Analyzer statistics by color
  */
 function updatePhaseAnalyzer(games) {
-    let whiteOpeningTotal = 0, whiteOpeningAdv = 0;
-    let whiteEndgameTotal = 0, whiteEndgameAdv = 0;
-    let blackOpeningTotal = 0, blackOpeningAdv = 0;
-    let blackEndgameTotal = 0, blackEndgameAdv = 0;
+    // Initialize counters for all 20 metrics + totals
+    const counts = {
+        white: {
+            opening: { total: 0, better: 0, slightlyBetter: 0, equal: 0, slightlyWorse: 0, worse: 0 },
+            endgame: { total: 0, better: 0, slightlyBetter: 0, equal: 0, slightlyWorse: 0, worse: 0 }
+        },
+        black: {
+            opening: { total: 0, better: 0, slightlyBetter: 0, equal: 0, slightlyWorse: 0, worse: 0 },
+            endgame: { total: 0, better: 0, slightlyBetter: 0, equal: 0, slightlyWorse: 0, worse: 0 }
+        }
+    };
+
+    // Helper to categorize and count an evaluation
+    const processEval = (evaluation, stats) => {
+        if (isNaN(evaluation)) return;
+        stats.total++;
+        switch (evaluation) {
+            case 1.0: stats.better++; break;
+            case 0.5: stats.slightlyBetter++; break;
+            case 0.0: stats.equal++; break;
+            case -0.5: stats.slightlyWorse++; break;
+            case -1.0: stats.worse++; break;
+        }
+    };
 
     games.forEach(game => {
         const openingEval = parseFloat(game['Evaluation after opening']);
         const endgameEval = parseFloat(game['Evaluation beginning end game']);
 
         if (game.MyColor === 'White') {
-            if (!isNaN(openingEval)) {
-                whiteOpeningTotal++;
-                if (openingEval > 0) whiteOpeningAdv++;
-            }
-            if (!isNaN(endgameEval)) {
-                whiteEndgameTotal++;
-                if (endgameEval > 0) whiteEndgameAdv++;
-            }
+            processEval(openingEval, counts.white.opening);
+            processEval(endgameEval, counts.white.endgame);
         } else if (game.MyColor === 'Black') {
-            if (!isNaN(openingEval)) {
-                blackOpeningTotal++;
-                if (openingEval < 0) blackOpeningAdv++;
-            }
-            if (!isNaN(endgameEval)) {
-                blackEndgameTotal++;
-                if (endgameEval < 0) blackEndgameAdv++;
-            }
+            processEval(openingEval, counts.black.opening);
+            processEval(endgameEval, counts.black.endgame);
         }
     });
 
-    const whiteOpeningPct = whiteOpeningTotal > 0 ? ((whiteOpeningAdv / whiteOpeningTotal) * 100).toFixed(1) : 0;
-    const whiteEndgamePct = whiteEndgameTotal > 0 ? ((whiteEndgameAdv / whiteEndgameTotal) * 100).toFixed(1) : 0;
-    const blackOpeningPct = blackOpeningTotal > 0 ? ((blackOpeningAdv / blackOpeningTotal) * 100).toFixed(1) : 0;
-    const blackEndgamePct = blackEndgameTotal > 0 ? ((blackEndgameAdv / blackEndgameTotal) * 100).toFixed(1) : 0;
+    // Helper to calculate percentage and update the DOM
+    const updateUI = (color, phase, stats) => {
+        const getPct = (count) => (stats.total > 0 ? (count / stats.total * 100).toFixed(1) : '0.0');
+        
+        document.getElementById(`${phase}-better-pct-${color}`).textContent = `${getPct(stats.better)}%`;
+        document.getElementById(`${phase}-slightly-better-pct-${color}`).textContent = `${getPct(stats.slightlyBetter)}%`;
+        document.getElementById(`${phase}-equal-pct-${color}`).textContent = `${getPct(stats.equal)}%`;
+        document.getElementById(`${phase}-slightly-worse-pct-${color}`).textContent = `${getPct(stats.slightlyWorse)}%`;
+        document.getElementById(`${phase}-worse-pct-${color}`).textContent = `${getPct(stats.worse)}%`;
+    };
 
-    openingAdvPctWhite.textContent = `${whiteOpeningPct}%`;
-    endgameAdvPctWhite.textContent = `${whiteEndgamePct}%`;
-    openingAdvPctBlack.textContent = `${blackOpeningPct}%`;
-    endgameAdvPctBlack.textContent = `${blackEndgamePct}%`;
+    // Update UI for all 4 sections
+    updateUI('white', 'opening', counts.white.opening);
+    updateUI('white', 'endgame', counts.white.endgame);
+    updateUI('black', 'opening', counts.black.opening);
+    updateUI('black', 'endgame', counts.black.endgame);
 }
 
 
@@ -376,9 +387,9 @@ function updateAdvantageOutcomeCharts(games) {
     // --- Opening Advantage ---
     const openingGames = games.filter(game => {
         const evalOpening = parseFloat(game['Evaluation after opening']);
-        if (game.MyColor === 'White' && !isNaN(evalOpening)) return evalOpening > 0;
-        if (game.MyColor === 'Black' && !isNaN(evalOpening)) return evalOpening < 0;
-        return false;
+        if (isNaN(evalOpening)) return false;
+        // Advantage is now considered "Slightly Better" (0.5) or "Better" (1.0)
+        return evalOpening > 0;
     });
 
     const openingStats = { wins: 0, losses: 0, draws: 0 };
@@ -401,9 +412,9 @@ function updateAdvantageOutcomeCharts(games) {
     // --- Endgame Advantage ---
     const endgameGames = games.filter(game => {
         const evalEnd = parseFloat(game['Evaluation beginning end game']);
-        if (game.MyColor === 'White' && !isNaN(evalEnd)) return evalEnd > 0;
-        if (game.MyColor === 'Black' && !isNaN(evalEnd)) return evalEnd < 0;
-        return false;
+        if (isNaN(evalEnd)) return false;
+        // Advantage is now considered "Slightly Better" (0.5) or "Better" (1.0)
+        return evalEnd > 0;
     });
 
     const endgameStats = { wins: 0, losses: 0, draws: 0 };
@@ -465,4 +476,3 @@ typeFilterContainer.addEventListener('click', (e) => {
 // --- INITIALIZATION ---
 
 initializeDashboard();
-
