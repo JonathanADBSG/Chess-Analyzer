@@ -39,12 +39,12 @@ async function initializeDashboard() {
     try {
         const response = await fetch(SCRIPT_URL);
         const data = await response.json();
-        
+
         if (data.error) throw new Error(`Error from Google Script: ${data.error}`);
         if (!data.logs) throw new Error("Data format from Google Script is incorrect.");
 
         allGames = data.logs;
-        updateDashboard(); 
+        updateDashboard();
     } catch (error) {
         console.error("Error during dashboard initialization:", error);
         alert(`Could not load game data: ${error.message}`);
@@ -58,7 +58,7 @@ async function initializeDashboard() {
 function updateDashboard() {
     let filteredGames = filterDataByDate(currentDateFilter);
     filteredGames = filterDataByType(filteredGames, currentGameTypeFilter);
-    
+
     updateOverallStats(filteredGames);
     updateStatsByColor(filteredGames);
     updateReasonReportForWhite(filteredGames);
@@ -107,7 +107,7 @@ function renderList(element, items) {
 }
 
 /**
- * Calculates and displays top openings by win rate for each color
+ * MODIFIED: Calculates and displays top openings by win rate for each color, with custom grouping.
  */
 function updateOpeningReport(games) {
     const whiteOpenings = {};
@@ -115,9 +115,15 @@ function updateOpeningReport(games) {
     const minGamesForRanking = 2;
 
     games.forEach(game => {
-        const opening = game.Opening;
+        let opening = game.Opening;
         if (!opening) return;
-        
+
+        // --- CUSTOM GROUPING LOGIC ---
+        if (game.MyColor === 'White' && opening.startsWith("Queen's Pawn Game: Chigorin Variation")) {
+            opening = "Rapport-Jobava System";
+        }
+        // --- END CUSTOM GROUPING ---
+
         let stats;
         if (game.MyColor === 'White') {
             if (!whiteOpenings[opening]) whiteOpenings[opening] = { name: opening, color: 'White', wins: 0, losses: 0, draws: 0, total: 0 };
@@ -137,7 +143,7 @@ function updateOpeningReport(games) {
 
     const allOpenings = [...Object.values(whiteOpenings), ...Object.values(blackOpenings)];
     openingStatsTbody.innerHTML = '';
-    allOpenings.forEach(op => {
+    allOpenings.sort((a, b) => b.total - a.total).forEach(op => {
         const winRate = op.total > 0 ? ((op.wins / op.total) * 100).toFixed(0) : 0;
         const row = `<tr><td>${op.name}</td><td>${op.color}</td><td>${op.wins}</td><td>${op.losses}</td><td>${op.draws}</td><td>${winRate}%</td></tr>`;
         openingStatsTbody.innerHTML += row;
@@ -148,13 +154,13 @@ function updateOpeningReport(games) {
             .filter(stats => stats.total >= minGamesForRanking)
             .map(stats => ({ ...stats, score: (stats.wins + stats.draws * 0.5) / stats.total }))
             .sort((a, b) => b.score - a.score);
-        
+
         const best = ranked.slice(0, 3).map(op => `${op.name} (${(op.score * 100).toFixed(0)}% score over ${op.total} games)`);
         const worst = ranked.slice(-3).reverse().map(op => `${op.name} (${(op.score * 100).toFixed(0)}% score over ${op.total} games)`);
-        
+
         return { best, worst };
     };
-    
+
     const whiteRanks = rankOpenings(whiteOpenings);
     const blackRanks = rankOpenings(blackOpenings);
 
@@ -164,12 +170,13 @@ function updateOpeningReport(games) {
     renderList(topOpeningsBlackWorstUl, blackRanks.worst);
 }
 
+
 /**
  * Calculates and displays the distribution of losses by game phase
  */
 function updateLossPhaseReport(games) {
     const phaseCounts = { 'Opening': 0, 'Middlegame': 0, 'Endgame': 0 };
-    
+
     const lostGames = games.filter(game => {
         const isWin = (game.MyColor === 'White' && game.Result === '1-0') || (game.MyColor === 'Black' && game.Result === '0-1');
         const isDraw = game.Result === '1/2-1/2';
@@ -213,9 +220,9 @@ function updatePhaseAnalyzer(games) {
     const processEval = (evaluation, stats) => {
         if (isNaN(evaluation)) return;
         stats.total++;
-        
+
         // Multiply by 10 to convert floats to integers for a reliable switch comparison
-        const evalInt = Math.round(evaluation * 10); 
+        const evalInt = Math.round(evaluation * 10);
 
         switch (evalInt) {
             case 10: stats.better++; break;
@@ -242,7 +249,7 @@ function updatePhaseAnalyzer(games) {
     // Helper to calculate percentage and update the DOM
     const updateUI = (color, phase, stats) => {
         const getPct = (count) => (stats.total > 0 ? (count / stats.total * 100).toFixed(1) : '0.0');
-        
+
         document.getElementById(`${phase}-better-pct-${color}`).textContent = `${getPct(stats.better)}%`;
         document.getElementById(`${phase}-slightly-better-pct-${color}`).textContent = `${getPct(stats.slightlyBetter)}%`;
         document.getElementById(`${phase}-equal-pct-${color}`).textContent = `${getPct(stats.equal)}%`;
@@ -272,7 +279,7 @@ function updateOverallStats(games) {
             stats.losses++;
         }
     });
-    
+
     renderPieChart(overallChartCanvas, 'overallChart', {
         labels: ['Wins', 'Losses', 'Draws'],
         data: [stats.wins, stats.losses, stats.draws],
@@ -376,7 +383,7 @@ function updateAdvantageReport(games) {
         .map(([adv, stats]) => ({ name: adv, winRate: stats.wins / stats.total }));
 
     rankedAdvantages.sort((a, b) => b.winRate - a.winRate);
-    
+
     const best = rankedAdvantages.slice(0, 3).map(a => `${a.name} (${(a.winRate * 100).toFixed(0)}% win rate)`);
     const worst = rankedAdvantages.slice(-3).reverse().map(a => `${a.name} (${(a.winRate * 100).toFixed(0)}% win rate)`);
 
@@ -443,7 +450,7 @@ function updateAdvantageOutcomeCharts(games) {
  */
 function renderPieChart(canvas, chartVar, chartData, options) {
     if (window[chartVar]) window[chartVar].destroy();
-    
+
     window[chartVar] = new Chart(canvas, {
         type: 'pie',
         data: {
