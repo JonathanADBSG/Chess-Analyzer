@@ -14,6 +14,10 @@ const topReasonsWinBlackUl = document.getElementById('top-reasons-win-black');
 const topReasonsLossBlackUl = document.getElementById('top-reasons-loss-black');
 const bestAdvantagesUl = document.getElementById('best-advantages');
 const worstAdvantagesUl = document.getElementById('worst-advantages');
+const bestStructuresWhiteUl = document.getElementById('best-structures-white'); // New
+const worstStructuresWhiteUl = document.getElementById('worst-structures-white'); // New
+const bestStructuresBlackUl = document.getElementById('best-structures-black'); // New
+const worstStructuresBlackUl = document.getElementById('worst-structures-black'); // New
 const lossPhaseChartCanvas = document.getElementById('loss-phase-chart');
 const topOpeningsWhiteBestUl = document.getElementById('top-openings-white-best');
 const topOpeningsWhiteWorstUl = document.getElementById('top-openings-white-worst');
@@ -66,6 +70,7 @@ function updateDashboard() {
     updateReasonReportForWhite(filteredGames);
     updateReasonReportForBlack(filteredGames);
     updateAdvantageReport(filteredGames);
+    updatePawnStructureReport(filteredGames); // New function call
     updatePhaseAnalyzer(filteredGames);
     updateLossPhaseReport(filteredGames);
     updateOpeningReport(filteredGames);
@@ -110,14 +115,13 @@ function renderList(element, items) {
 }
 
 /**
- * MODIFIED: Calculates and displays top openings, grouped by color, with a new usage % column.
+ * Calculates and displays top openings, grouped by color, with a new usage % column.
  */
 function updateOpeningReport(games) {
     const whiteOpenings = {};
     const blackOpenings = {};
     const minGamesForRanking = 2;
 
-    // Calculate total games for each color to determine usage percentage
     const totalWhiteGames = games.filter(g => g.MyColor === 'White').length;
     const totalBlackGames = games.filter(g => g.MyColor === 'Black').length;
 
@@ -125,11 +129,9 @@ function updateOpeningReport(games) {
         let opening = game.Opening;
         if (!opening) return;
 
-        // --- CUSTOM GROUPING LOGIC ---
         if (game.MyColor === 'White' && opening.startsWith("Queen's Pawn Game: Chigorin Variation")) {
             opening = "Rapport-Jobava System";
         }
-        // --- END CUSTOM GROUPING ---
 
         let stats;
         if (game.MyColor === 'White') {
@@ -148,14 +150,13 @@ function updateOpeningReport(games) {
         else stats.losses++;
     });
 
-    openingStatsTbody.innerHTML = ''; // Clear the table body
+    openingStatsTbody.innerHTML = '';
 
-    // Helper function to generate table rows for a given set of openings
     const generateTableRows = (openingsObject, totalGamesForColor) => {
         const openingsArray = Object.values(openingsObject);
         let rowsHtml = '';
         openingsArray
-            .sort((a, b) => b.total - a.total) // Sort by most played
+            .sort((a, b) => b.total - a.total)
             .forEach(op => {
                 const winRate = op.total > 0 ? ((op.wins / op.total) * 100).toFixed(0) : 0;
                 const usagePct = totalGamesForColor > 0 ? ((op.total / totalGamesForColor) * 100).toFixed(0) : 0;
@@ -164,11 +165,9 @@ function updateOpeningReport(games) {
         return rowsHtml;
     };
 
-    // Generate and append rows for White, then for Black
     openingStatsTbody.innerHTML += generateTableRows(whiteOpenings, totalWhiteGames);
     openingStatsTbody.innerHTML += generateTableRows(blackOpenings, totalBlackGames);
 
-    // This part for the Top 3 Best/Worst lists remains the same
     const rankOpenings = (openingsObject) => {
         const ranked = Object.values(openingsObject)
             .filter(stats => stats.total >= minGamesForRanking)
@@ -191,23 +190,20 @@ function updateOpeningReport(games) {
 }
 
 /**
- * MODIFIED: Calculates top 3 improvised openings separately for White and Black.
+ * Calculates top 3 improvised openings separately for White and Black.
  */
 function updateImprovisedOpeningsReport(games) {
     const whiteOpeningStats = {};
     const blackOpeningStats = {};
-    const minGamesForRanking = 2; // Minimum number of games to be considered
+    const minGamesForRanking = 2;
 
     games.forEach(game => {
         let opening = game.Opening;
         const inBookStatus = game['In book during opening'];
-
-        if (!opening || !inBookStatus) return; // Skip if data is missing
+        if (!opening || !inBookStatus) return;
 
         let targetStats;
-
         if (game.MyColor === 'White') {
-            // Apply custom grouping for White
             if (opening.startsWith("Queen's Pawn Game: Chigorin Variation")) {
                 opening = "Rapport-Jobava System";
             }
@@ -215,26 +211,19 @@ function updateImprovisedOpeningsReport(games) {
         } else if (game.MyColor === 'Black') {
             targetStats = blackOpeningStats;
         } else {
-            return; // Skip if color isn't White or Black
+            return;
         }
 
-        // Initialize if first time seeing this opening
         if (!targetStats[opening]) {
-            targetStats[opening] = {
-                name: opening,
-                total: 0,
-                improvisedCount: 0
-            };
+            targetStats[opening] = { name: opening, total: 0, improvisedCount: 0 };
         }
 
-        // Increment counts
         targetStats[opening].total++;
         if (inBookStatus === 'No' || inBookStatus === 'Improvised') {
             targetStats[opening].improvisedCount++;
         }
     });
 
-    // Helper function to process and rank the openings for a given color
     const rankAndFormat = (statsObject) => {
         return Object.values(statsObject)
             .filter(stats => stats.total >= minGamesForRanking)
@@ -247,12 +236,70 @@ function updateImprovisedOpeningsReport(games) {
             .map(stats => `${stats.name} (${stats.improvisedPct.toFixed(0)}% improvised over ${stats.total} games)`);
     };
 
-    // Process for each color and render to the UI
     const rankedWhiteOpenings = rankAndFormat(whiteOpeningStats);
     const rankedBlackOpenings = rankAndFormat(blackOpeningStats);
 
     renderList(improvisedOpeningsWhiteUl, rankedWhiteOpenings);
     renderList(improvisedOpeningsBlackUl, rankedBlackOpenings);
+}
+
+/**
+ * NEW: Calculates and displays best/worst pawn structures by performance for each color.
+ */
+function updatePawnStructureReport(games) {
+    const whiteStructureStats = {};
+    const blackStructureStats = {};
+    const minGamesForRanking = 2; // Minimum number of games to be considered
+
+    games.forEach(game => {
+        const structure = game['Middle game pawn structure'];
+        if (!structure) return;
+
+        let targetStats;
+        if (game.MyColor === 'White') {
+            targetStats = whiteStructureStats;
+        } else if (game.MyColor === 'Black') {
+            targetStats = blackStructureStats;
+        } else {
+            return;
+        }
+
+        if (!targetStats[structure]) {
+            targetStats[structure] = { name: structure, wins: 0, losses: 0, draws: 0, total: 0 };
+        }
+
+        targetStats[structure].total++;
+        if (game.Result === '1/2-1/2') {
+            targetStats[structure].draws++;
+        } else if ((game.MyColor === 'White' && game.Result === '1-0') || (game.MyColor === 'Black' && game.Result === '0-1')) {
+            targetStats[structure].wins++;
+        } else {
+            targetStats[structure].losses++;
+        }
+    });
+
+    const rankStructures = (statsObject) => {
+        const ranked = Object.values(statsObject)
+            .filter(stats => stats.total >= minGamesForRanking)
+            .map(stats => ({
+                ...stats,
+                score: (stats.wins + stats.draws * 0.5) / stats.total
+            }))
+            .sort((a, b) => b.score - a.score);
+
+        const best = ranked.slice(0, 3).map(s => `${s.name} (${(s.score * 100).toFixed(0)}% score over ${s.total} games)`);
+        const worst = ranked.slice(-3).reverse().map(s => `${s.name} (${(s.score * 100).toFixed(0)}% score over ${s.total} games)`);
+        
+        return { best, worst };
+    };
+
+    const whiteRanks = rankStructures(whiteStructureStats);
+    const blackRanks = rankStructures(blackStructureStats);
+
+    renderList(bestStructuresWhiteUl, whiteRanks.best);
+    renderList(worstStructuresWhiteUl, whiteRanks.worst);
+    renderList(bestStructuresBlackUl, blackRanks.best);
+    renderList(worstStructuresBlackUl, blackRanks.worst);
 }
 
 
@@ -478,14 +525,11 @@ function updateAdvantageReport(games) {
 
 /**
  * CORRECTED: This function calculates W/L/D for games where you had an advantage.
- * It now correctly handles the new evaluation system for both colors.
  */
 function updateAdvantageOutcomeCharts(games) {
     // --- Opening Advantage ---
     const openingGamesWithAdvantage = games.filter(game => {
         const evalOpening = parseFloat(game['Evaluation after opening']);
-        // An advantage is a positive evaluation (0.5 for Slightly Better, 1.0 for Better).
-        // This logic is now color-agnostic because the form captures the player's perspective.
         return !isNaN(evalOpening) && evalOpening > 0;
     });
 
@@ -508,7 +552,6 @@ function updateAdvantageOutcomeCharts(games) {
     // --- Endgame Advantage ---
     const endgameGamesWithAdvantage = games.filter(game => {
         const evalEnd = parseFloat(game['Evaluation beginning end game']);
-        // The logic is the same for the endgame evaluation.
         return !isNaN(evalEnd) && evalEnd > 0;
     });
 
