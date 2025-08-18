@@ -19,6 +19,7 @@ const topOpeningsWhiteBestUl = document.getElementById('top-openings-white-best'
 const topOpeningsWhiteWorstUl = document.getElementById('top-openings-white-worst');
 const topOpeningsBlackBestUl = document.getElementById('top-openings-black-best');
 const topOpeningsBlackWorstUl = document.getElementById('top-openings-black-worst');
+const improvisedOpeningsUl = document.getElementById('improvised-openings-list'); // New element
 const openingStatsTbody = document.querySelector('#opening-stats-table tbody');
 const openingAdvChartCanvas = document.getElementById('opening-advantage-chart');
 const endgameAdvChartCanvas = document.getElementById('endgame-advantage-chart');
@@ -67,6 +68,7 @@ function updateDashboard() {
     updatePhaseAnalyzer(filteredGames);
     updateLossPhaseReport(filteredGames);
     updateOpeningReport(filteredGames);
+    updateImprovisedOpeningsReport(filteredGames); // New function call
     updateAdvantageOutcomeCharts(filteredGames);
 }
 
@@ -107,7 +109,7 @@ function renderList(element, items) {
 }
 
 /**
- * MODIFIED: Calculates and displays top openings by win rate for each color, with custom grouping.
+ * Calculates and displays top openings by win rate for each color, with custom grouping.
  */
 function updateOpeningReport(games) {
     const whiteOpenings = {};
@@ -168,6 +170,55 @@ function updateOpeningReport(games) {
     renderList(topOpeningsWhiteWorstUl, whiteRanks.worst);
     renderList(topOpeningsBlackBestUl, blackRanks.best);
     renderList(topOpeningsBlackWorstUl, blackRanks.worst);
+}
+
+/**
+ * NEW: Calculates and displays the top 3 openings that are most frequently improvised or out-of-book.
+ */
+function updateImprovisedOpeningsReport(games) {
+    const openingStats = {};
+    const minGamesForRanking = 2; // Minimum number of games to be considered
+
+    games.forEach(game => {
+        let opening = game.Opening;
+        const inBookStatus = game['In book during opening'];
+
+        if (!opening || !inBookStatus) return; // Skip if data is missing
+
+        // Apply the same custom grouping as in the main opening report
+        if (game.MyColor === 'White' && opening.startsWith("Queen's Pawn Game: Chigorin Variation")) {
+            opening = "Rapport-Jobava System";
+        }
+
+        // Initialize if first time seeing this opening
+        if (!openingStats[opening]) {
+            openingStats[opening] = {
+                name: opening,
+                total: 0,
+                improvisedCount: 0
+            };
+        }
+
+        // Increment counts
+        openingStats[opening].total++;
+        if (inBookStatus === 'No' || inBookStatus === 'Improvised') {
+            openingStats[opening].improvisedCount++;
+        }
+    });
+
+    // Process and rank the openings
+    const rankedOpenings = Object.values(openingStats)
+        .filter(stats => stats.total >= minGamesForRanking) // Filter for openings with enough games
+        .map(stats => ({
+            ...stats,
+            improvisedPct: (stats.improvisedCount / stats.total) * 100
+        }))
+        .sort((a, b) => b.improvisedPct - a.improvisedPct) // Sort by highest percentage
+        .slice(0, 3) // Get the top 3
+        .map(stats => `${stats.name} (${stats.improvisedPct.toFixed(0)}% improvised over ${stats.total} games)`);
+
+    // Render the list to the UI
+    renderList(improvisedOpeningsUl, rankedOpenings);
 }
 
 
