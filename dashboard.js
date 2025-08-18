@@ -19,8 +19,8 @@ const topOpeningsWhiteBestUl = document.getElementById('top-openings-white-best'
 const topOpeningsWhiteWorstUl = document.getElementById('top-openings-white-worst');
 const topOpeningsBlackBestUl = document.getElementById('top-openings-black-best');
 const topOpeningsBlackWorstUl = document.getElementById('top-openings-black-worst');
-const improvisedOpeningsWhiteUl = document.getElementById('improvised-openings-white-list'); // New
-const improvisedOpeningsBlackUl = document.getElementById('improvised-openings-black-list'); // New
+const improvisedOpeningsWhiteUl = document.getElementById('improvised-openings-white-list');
+const improvisedOpeningsBlackUl = document.getElementById('improvised-openings-black-list');
 const openingStatsTbody = document.querySelector('#opening-stats-table tbody');
 const openingAdvChartCanvas = document.getElementById('opening-advantage-chart');
 const endgameAdvChartCanvas = document.getElementById('endgame-advantage-chart');
@@ -110,12 +110,16 @@ function renderList(element, items) {
 }
 
 /**
- * Calculates and displays top openings by win rate for each color, with custom grouping.
+ * MODIFIED: Calculates and displays top openings, grouped by color, with a new usage % column.
  */
 function updateOpeningReport(games) {
     const whiteOpenings = {};
     const blackOpenings = {};
     const minGamesForRanking = 2;
+
+    // Calculate total games for each color to determine usage percentage
+    const totalWhiteGames = games.filter(g => g.MyColor === 'White').length;
+    const totalBlackGames = games.filter(g => g.MyColor === 'Black').length;
 
     games.forEach(game => {
         let opening = game.Opening;
@@ -144,14 +148,27 @@ function updateOpeningReport(games) {
         else stats.losses++;
     });
 
-    const allOpenings = [...Object.values(whiteOpenings), ...Object.values(blackOpenings)];
-    openingStatsTbody.innerHTML = '';
-    allOpenings.sort((a, b) => b.total - a.total).forEach(op => {
-        const winRate = op.total > 0 ? ((op.wins / op.total) * 100).toFixed(0) : 0;
-        const row = `<tr><td>${op.name}</td><td>${op.color}</td><td>${op.wins}</td><td>${op.losses}</td><td>${op.draws}</td><td>${winRate}%</td></tr>`;
-        openingStatsTbody.innerHTML += row;
-    });
+    openingStatsTbody.innerHTML = ''; // Clear the table body
 
+    // Helper function to generate table rows for a given set of openings
+    const generateTableRows = (openingsObject, totalGamesForColor) => {
+        const openingsArray = Object.values(openingsObject);
+        let rowsHtml = '';
+        openingsArray
+            .sort((a, b) => b.total - a.total) // Sort by most played
+            .forEach(op => {
+                const winRate = op.total > 0 ? ((op.wins / op.total) * 100).toFixed(0) : 0;
+                const usagePct = totalGamesForColor > 0 ? ((op.total / totalGamesForColor) * 100).toFixed(0) : 0;
+                rowsHtml += `<tr><td>${op.name}</td><td>${op.color}</td><td>${op.wins}</td><td>${op.losses}</td><td>${op.draws}</td><td>${winRate}%</td><td>${usagePct}%</td></tr>`;
+            });
+        return rowsHtml;
+    };
+
+    // Generate and append rows for White, then for Black
+    openingStatsTbody.innerHTML += generateTableRows(whiteOpenings, totalWhiteGames);
+    openingStatsTbody.innerHTML += generateTableRows(blackOpenings, totalBlackGames);
+
+    // This part for the Top 3 Best/Worst lists remains the same
     const rankOpenings = (openingsObject) => {
         const ranked = Object.values(openingsObject)
             .filter(stats => stats.total >= minGamesForRanking)
