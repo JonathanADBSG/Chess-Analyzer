@@ -194,10 +194,10 @@ function updateLossPhaseReport(games) {
 }
 
 /**
- * Calculates and displays the detailed Game Phase Analyzer statistics by color
+ * ROBUST VERSION: Calculates and displays the detailed Game Phase Analyzer statistics by color
  */
 function updatePhaseAnalyzer(games) {
-    // Initialize counters for all 20 metrics + totals
+    // Initialize counters
     const counts = {
         white: {
             opening: { total: 0, better: 0, slightlyBetter: 0, equal: 0, slightlyWorse: 0, worse: 0 },
@@ -213,12 +213,16 @@ function updatePhaseAnalyzer(games) {
     const processEval = (evaluation, stats) => {
         if (isNaN(evaluation)) return;
         stats.total++;
-        switch (evaluation) {
-            case 1.0: stats.better++; break;
-            case 0.5: stats.slightlyBetter++; break;
-            case 0.0: stats.equal++; break;
-            case -0.5: stats.slightlyWorse++; break;
-            case -1.0: stats.worse++; break;
+        
+        // Multiply by 10 to convert floats to integers for a reliable switch comparison
+        const evalInt = Math.round(evaluation * 10); 
+
+        switch (evalInt) {
+            case 10: stats.better++; break;
+            case 5: stats.slightlyBetter++; break;
+            case 0: stats.equal++; break;
+            case -5: stats.slightlyWorse++; break;
+            case -10: stats.worse++; break;
         }
     };
 
