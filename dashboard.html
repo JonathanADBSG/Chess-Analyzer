@@ -101,6 +101,15 @@
 #filter-container > div {
   overflow-x: auto;
 }
+
+		#filter-container > div {
+  overflow-x: auto;
+}
+
+/* START: Add this new CSS rule */
+.table-container {
+    overflow-x: auto; /* This is the magic property! */
+}
     </style>
 </head>
 <body>
@@ -299,6 +308,7 @@
 
             <div class="stat-card" style="grid-column: 1 / -1;">
                 <h2>Opening Performance</h2>
+				 <div class="table-container">
                 <table id="opening-stats-table">
                     <thead>
                         <tr>
@@ -315,6 +325,7 @@
                         </tbody>
                 </table>
             </div>
+				 </div>
 
         <button onclick="window.location.href='index.html'" class="button-secondary" style="margin-top: 20px;">← Back to Home</button>
     </div>
@@ -332,3 +343,4 @@
 </script>
 </body>
 </html>
+
